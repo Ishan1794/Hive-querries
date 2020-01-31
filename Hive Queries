@@ -1,0 +1,35 @@
+Hive
+
+2b) find top 5 locations in the US who have got certified visa for each year.
+
+
+select worksite,year,count(worksite) as location from h1b_applications where case_status='CERTIFIED' or case_status='CERTIFIED WITHDRAWN' group by year,worksite order by location desc limit 6;
+
+
+3)Which industry has the most number of Data Scientist positions?
+
+select soc_name, count(job_title) as Max,year from h1b_applications where job_title = 'DATA SCIENTIST' group by soc_name,year order by Max desc;
+
+
+5) Find the most popular top 10 job positions for H1B visa applications for each year?
+
+select job_title,year from(select rank() over(partition by year order by T10Job desc)as rank_1,job_title,year from(select count(job_title)as T10Job,job_title,year from h1b_applications group by job_title,year)a)b where rank_1<=10;
+
+
+7) Create a bar graph to depict the number of applications for each year
+
+select year,count(soc_name) as applications from h1b_applications group by year;
+
+
+
+8) Find the average Prevailing Wage for each Job for each Year (take part time and full time separate). Arrange the output in descending order.
+
+select b.job_title,round(b.Yavg,2) ,round(a.Navg,2) ,a.year from (select year,avg(prevailing_wage)as Navg,job_title from h1b_applications where full_time_position="N"  group by job_title,year) a join (select avg(prevailing_wage)as Yavg,job_title from h1b_applications where full_time_position="Y" group by job_title,year order by Y_avg desc) b on a.job_title=b.job_title;
+
+
+9) Which are  employers along with the number of petitions who have the success rate more than 70%  in petitions and total petitions filed more than 1000?
+
+
+select a.employer_name, (a.Certmost + b.Certmost1)/c.total from
+(select employer_name, count(employer_name)as Certmost from h1b_applications where case_status="CERTIFIED"group by employer_name) a,(select employer_name, count(employer_name)as Certmost1 from h1b_applications where case_status="CERTIFIED-WITHDRAWN"  group by employer_name)b ,(select count(employer_name)as total from h1b_applications) c;
+
